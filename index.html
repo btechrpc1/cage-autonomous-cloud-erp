@@ -343,7 +343,7 @@
                 document.getElementById('facultySyllabusStatus').innerText = `✅ Syllabus PDF Saved for [${branch} - ${sem}]`;
                 alert("Success: Syllabus document committed to storage.");
             };
-            reader.readAsDataURL(fileInput.files[0]);
+            reader.readAsDataURL(fileInput.files);
         }
 
         function updateStudentSyllabusUI() {
@@ -406,4 +406,4 @@
             session_metrics[branch][sem] += 1;
             document.getElementById('totalClassesLabel').innerText = session_metrics[branch][sem];
             saveDatabase();
-        } 
+        }
