@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CGEC - Autonomous Academic Cloud ERP</title>
+    <title>CGEC - Enterprise Core Cloud ERP Infrastructure</title>
     <style>
         :root {
             --bg-main: #0b0f19;
@@ -11,148 +11,226 @@
             --accent: #38bdf8;
             --text-primary: #f8fafc;
             --border-color: #243552;
+            --present-color: #34d399;
+            --absent-color: #f87171;
         }
+
         body {
-            background-color: var(--bg-main); color: var(--text-primary);
+            background-color: var(--bg-main);
+            color: var(--text-primary);
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            margin: 0; padding: 20px;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
         }
-        .container { max-width: 650px; margin: 0 auto; }
+
+        .container {
+            max-width: 650px;
+            margin: 0 auto;
+        }
+
         .college-header {
-            text-align: center; background: linear-gradient(135deg, #1e3a8a, #0369a1);
-            padding: 15px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #38bdf8;
+            text-align: center;
+            background: linear-gradient(135deg, #1e3a8a, #0369a1);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border: 1px solid #38bdf8;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
-        .college-header h2 { margin: 0; color: white; font-size: 20px; }
-        .college-header p { margin: 5px 0 0 0; color: #bae6fd; font-size: 13px; }
+
+        .college-header h2 {
+            margin: 0;
+            color: white;
+            font-size: 22px;
+            letter-spacing: 0.5px;
+        }
+
+        .college-header p {
+            margin: 5px 0 0 0;
+            color: #bae6fd;
+            font-size: 13px;
+        }
+
         .card {
-            background-color: var(--card-bg); padding: 20px; border-radius: 8px;
-            margin-bottom: 20px; border: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
         }
+
         .security-card { border-left: 5px solid #ef4444; }
         .central-gateway-card { border: 2px solid var(--accent); background: #111827; }
         .gateway-row { display: flex; flex-direction: column; gap: 15px; margin-top: 15px; }
-        h3 { margin-top: 0; color: #cbd5e1; font-size: 15px; text-align: center; }
+
+        .popup-notification {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 500px;
+            background-color: #7f1d1d;
+            border: 2px solid #ef4444;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            z-index: 10000;
+        }
+
+        .popup-content { padding: 15px; color: #fecdd3; text-align: center; }
+        .popup-content h4 { margin: 0 0 8px 0; font-weight: bold; font-size: 14px; color: #f87171; }
+        .popup-content p { margin: 0 0 12px 0; font-size: 12px; font-family: sans-serif; line-height: 1.4; }
+
+        h3 { margin-top: 0; color: #cbd5e1; font-size: 16px; text-align: center; }
         h4 { margin: 5px 0 10px 0; color: #94a3b8; font-size: 13px; }
+        .section-desc { font-size: 12px; color: #94a3b8; margin-top: -8px; margin-bottom: 15px; }
+
         input, select, textarea {
-            width: 100%; padding: 12px; margin-bottom: 10px;
-            background-color: #0b0f19; border: 1px solid var(--border-color);
-            border-radius: 4px; color: white; font-size: 13px; box-sizing: border-box;
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 12px;
+            background-color: #0b0f19;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: white;
+            font-size: 13px;
+            box-sizing: border-box;
         }
+
         input[type="password"] { border: 1px solid #ef4444; color: #f87171; font-weight: bold; }
+        input:focus, select:focus, textarea:focus { border-color: var(--accent); outline: none; }
+
         button {
-            width: 100%; padding: 14px; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.15s; display: block; box-sizing: border-box;
+            width: 100%;
+            padding: 14px;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+            transition: 0.15s;
+            display: block;
+            box-sizing: border-box;
         }
+
         button:hover { opacity: 0.9; transform: scale(0.99); }
+        .btn-primary { background-color: #2563eb; }
         .btn-secondary { background-color: #334155; }
         .row { display: flex; gap: 10px; }
-        .academic-days-tracker { background: #0b0f19; padding: 10px; border-radius: 4px; border: 1px dashed var(--border-color); }
-        .academic-days-tracker p { margin: 0; font-size: 12px; }
-        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; margin-top: 10px; }
+
+        .academic-days-tracker {
+            background: #0b0f19;
+            padding: 12px;
+            border-radius: 4px;
+            border: 1px dashed var(--border-color);
+            margin-top: 10px;
+        }
+
+        .academic-days-tracker p { margin: 0; font-size: 12px; color: #94a3b8; }
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; margin-top: 12px; }
+
         .student-grid-card {
-            background-color: #1e293b; padding: 8px; border-radius: 4px; text-align: center;
-            font-size: 11px; cursor: pointer; border: 1px solid #334155; font-weight: bold;
+            background-color: #1e293b;
+            padding: 10px 5px;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 11px;
+            cursor: pointer;
+            border: 1px solid #334155;
+            font-weight: bold;
+            user-select: none;
         }
-        .student-grid-card.present { background-color: #065f46; border-color: #34d399; color: #a7f3d0; }
-        .student-grid-card.absent { background-color: #7f1d1d; border-color: #f87171; color: #fecdd3; }
+
+        .student-grid-card.present { background-color: #065f46; border-color: var(--present-color); color: #a7f3d0; }
+        .student-grid-card.absent { background-color: #7f1d1d; border-color: var(--absent-color); color: #fecdd3; }
+
         .output-box {
-            margin-top: 15px; padding: 15px; background-color: #0b0f19;
-            border-radius: 4px; border-left: 4px solid var(--accent); white-space: pre-line; font-family: monospace; font-size: 12px;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #0b0f19;
+            border-radius: 4px;
+            border-left: 4px solid var(--accent);
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+            color: #cbd5e1;
+            line-height: 1.4;
         }
+
         hr { border: 0; border-top: 1px solid var(--border-color); margin: 15px 0; }
     </style>
 </head>
 <body>
+    <div id="noticePopUp" class="popup-notification">
+        <div class="popup-content">
+            <h4>🚨 DEPARTEMENTAL EMERGENCY BROADCAST NOTICE</h4>
+            <p id="popupNoticeText">No active announcements at this timestamp.</p>
+            <button onclick="closeNoticePopUp()" class="btn-secondary" style="padding: 5px 15px; font-size: 11px; width: auto; margin: 0 auto;">Dismiss Notice</button>
+        </div>
+    </div>
+
+    <div id="reminderPopUp" class="popup-notification" style="background-color: #9a3412; border-color: #f97316;">
+        <div class="popup-content" style="color: #ffedd5;">
+            <h4>⚡ URGENT ACADEMIC PENDING REMINDER</h4>
+            <p id="popupReminderText">Verifying deliverables matrix...</p>
+            <button onclick="closeReminderPopUp()" class="btn-secondary" style="padding: 5px 15px; font-size: 11px; background-color: #ea580c; width: auto; margin: 0 auto;">Acknowledge & Close</button>
+        </div>
+    </div>
+
+    <div id="facultyReminderPopUp" class="popup-notification" style="background-color: #1e3a8a; border-color: #3b82f6;">
+        <div class="popup-content" style="color: #eff6ff;">
+            <h4>🔔 FACULTY ACTIVE SCHEDULE REMINDER</h4>
+            <p id="facultyReminderText">Academic session verification log pending. Please initialize daily attendance grid.</p>
+            <button onclick="closeFacultyReminderPopUp()" class="btn-secondary" style="padding: 5px 15px; font-size: 11px; background-color: #2563eb; width: auto; margin: 0 auto;">Acknowledge & Sync</button>
+        </div>
+    </div>
+
     <div class="container">
         <div class="college-header">
             <h2>🏛️ COOCH BEHAR GOVERNMENT ENGINEERING COLLEGE</h2>
             <p>Autonomous 4-Year Academic Cloud ERP Node Infrastructure</p>
         </div>
         
-        <!-- STEP 1: PORTAL SELECTION GATEWAY -->
         <div id="portalGateway" class="card central-gateway-card">
             <h3>🎯 Select Identification Framework to Enter System</h3>
-            <div class="row gateway-row">
+            <div class="gateway-row">
                 <button onclick="switchPortalView('faculty-auth')" style="background-color: #2563eb; padding: 18px; font-size: 15px;">👨‍🏫 ENTER FACULTY / TEACHER PORTAL</button>
                 <button onclick="switchPortalView('student-portal')" style="background-color: #10b981; padding: 18px; font-size: 15px;">👨‍🎓 ENTER STUDENT PUBLIC PORTAL</button>
             </div>
         </div>
 
-        <!-- STEP 2: SECURE FACULTY AUTHENTICATION SCREEN -->
         <div id="facultyAuthScreen" class="card security-card" style="display: none;">
             <h3>🔐 Faculty Security Verification Matrix</h3>
+            <p class="section-desc">Please authenticate your department key credentials to unlock write privileges.</p>
             <input type="password" id="facultyPass" placeholder="Enter Faculty Security Key (Default: cgec@2026)">
-            <button onclick="verifyAndUnlockFacultyDashboard()" style="background-color: #ef4444; margin-top: 12px;">🔓 Verify & Unlock Dashboard</button>
+            <button onclick="verifyAndUnlockFacultyDashboard()" style="background-color: #ef4444; margin-top: 5px;">🔓 Verify & Unlock Administrative Dashboard</button>
             <button onclick="returnToGateway()" class="btn-secondary" style="margin-top: 10px;">← Back to Main Menu</button>
         </div>
 
-        <!-- STEP 3: UNLOCKED FACULTY INTERFACE WORKSPACE -->
         <div id="facultyDashboardWorkspace" style="display: none;">
-            <div class="card filter-card">
-                <h3>🎯 Academic Workspace Environments</h3>
+            <div class="card">
+                <h3>🎯 Academic Workspace Configuration Environment</h3>
                 <div class="row">
                     <select id="branchSelect" onchange="onBranchOrSemChange()">
                         <option value="CE">Civil Engineering (CE)</option>
                         <option value="CSE">Computer Science & Engineering (CSE)</option>
+                        <option value="ECE">Electronics & Communication (ECE)</option>
+                        <option value="EE">Electrical Engineering (EE)</option>
+                        <option value="ME">Mechanical Engineering (ME)</option>
                     </select>
                     <select id="semSelect" onchange="onBranchOrSemChange()">
-                        <option value="Sem1">1st Semester</option>
-                        <option value="Sem2">2nd Semester</option>
+                        <option value="Sem1">1st Semester (Year 1 - Sem 1)</option>
+                        <option value="Sem2">2nd Semester (Year 1 - Sem 2)</option>
+                        <option value="Sem3">3rd Semester (Year 2 - Sem 3)</option>
+                        <option value="Sem8">8th Semester (Year 4 - Sem 8)</option>
                     </select>
                 </div>
                 <div class="academic-days-tracker">
-                    <p>📈 Total Conducted Sessions: <strong id="totalClassesLabel">0</strong> Classes</p>
-                    <button onclick="incrementTotalClasses()" style="background-color: #3b82f6; font-size: 11px; padding: 6px 12px; margin-top: 5px;">➕ Log New Academic Class Session</button>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3>👥 Register Student Node</h3>
-                <div class="row">
-                    <input type="text" id="sFirstName" placeholder="First Name">
-                    <input type="text" id="sLastName" placeholder="Last Name">
-                </div>
-                <input type="number" id="sRoll" placeholder="Enter University Roll Identifier">
-                <input type="tel" id="sPhone" placeholder="Student Mobile Number">
-                <hr>
-                <input type="text" id="gName" placeholder="Guardian Full Name">
-                <input type="tel" id="gPhone" placeholder="Guardian Emergency Mobile Number">
-                <button onclick="registerStudent()" style="background-color: #0284c7; margin-top: 5px;">Initialize Registration Matrix</button>
-            </div>
-
-            <div class="card">
-                <h3>📋 Smart One-Click Visual Attendance Grid</h3>
-                <div id="attendanceGrid" class="grid-container"></div>
-            </div>
-
-            <div class="card">
-                <h3>📊 Comprehensive MAKAUT Evaluation Control Panel</h3>
-                <input type="number" id="tRoll" placeholder="Target Student Roll Number">
-                <div class="row">
-                    <input type="number" id="ca1Marks" placeholder="CA 1 (0-25)">
-                    <input type="number" id="ca2Marks" placeholder="CA 2 (0-25)">
-                </div>
-                <input type="number" id="sMarks" step="0.1" placeholder="Enter End-Sem SGPA Metric (0.0 - 10.0)">
-                <button onclick="updateTeacherData()" style="background-color: #059669; margin-top: 10px;">Lock & Commit Data States</button>
-            </div>
-            
-            <button onclick="lockAndLogoutFaculty()" class="btn-secondary" style="margin-top: 15px; background-color: #ef4444;">🔒 Lock & Logout</button>
-        </div>
-
-        <!-- STEP 4: STUDENT PORTAL WORKSPACE -->
-        <div id="studentPortalWorkspace" style="display: none;">
-            <div class="card" style="border-left: 5px solid #10b981;">
-                <h3>📊 Student Portal: View 4-Year Deep Analytics</h3>
-                <div class="row">
-                    <input type="number" id="searchRoll" placeholder="Enter Your Registered University Roll Number">
-                    <button onclick="generateDeepReport()" style="background-color: #10b981; width: auto;">Generate Dossier</button>
-                </div>
-                <div id="reportOutput" class="output-box">Student individual verified record statement...</div>
-                <button onclick="returnToGateway()" class="btn-secondary" style="margin-top: 15px;">← Back to Main Gate</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
+                    <p>📈 Total Conducted Sessions: <strong id="totalClassesLabel" style="color:var(--accent);">0</strong> Classes</p>
+                    <script>
         let global_college_db = JSON.parse(localStorage.getItem('cgec_premium_db')) || [
             { 
                 roll: 3006789, firstName: "Rudra Protap", lastName: "Chowdhury", studentPhone: "9876543210", 
@@ -164,23 +242,168 @@
         ];
 
         let session_metrics = JSON.parse(localStorage.getItem('cgec_sessions')) || {
-            CE: { Sem1: 20, Sem2: 0 }, CSE: { Sem1: 20, Sem2: 0 }
+            CE: { Sem1: 20, Sem2: 0, Sem3: 0, Sem8: 0 },
+            CSE: { Sem1: 20, Sem2: 0, Sem3: 0, Sem8: 0 },
+            ECE: { Sem1: 20, Sem2: 0, Sem3: 0, Sem8: 0 },
+            EE: { Sem1: 20, Sem2: 0, Sem3: 0, Sem8: 0 },
+            ME: { Sem1: 20, Sem2: 0, Sem3: 0, Sem8: 0 }
+        };
+
+        let faculty_karma_score = JSON.parse(localStorage.getItem('cgec_faculty_karma')) || { total_stars: 25, total_ratings_count: 5 };
+
+        const branch_syllabus = {
+            CE: ["Engineering Graphics & Design", "Surveying Practical", "Fluid Mechanics Evaluation", "Solid Mechanics Lab"],
+            CSE: ["Programming in C Laboratory", "Digital Logic Architecture", "Data Structures Workshop", "Discrete Mathematics Matrix"],
+            ECE: ["Basic Electronics Laboratory", "Circuit Theory & Network Analytics", "Analog Circuits Evaluation"],
+            EE: ["Basic Electrical Engineering Lab", "Electric Circuit Analysis", "Electrical Measurement Practical"],
+            ME: ["Workshop & Manufacturing Practices", "Engineering Mechanics Lab", "Material Science Tech"]
         };
 
         function saveDatabase() {
             localStorage.setItem('cgec_premium_db', JSON.stringify(global_college_db));
             localStorage.setItem('cgec_sessions', JSON.stringify(session_metrics));
+            localStorage.setItem('cgec_faculty_karma', JSON.stringify(faculty_karma_score));
+        }
+
+        function getFacultyPassword() {
+            let savedPass = localStorage.getItem('faculty_key');
+            return savedPass || 'cgec@2026';
         }
 
         function switchPortalView(targetView) {
-            document.getElementById('portalGateway').style.display = 'none';
-            document.getElementById('facultyAuthScreen').style.display = 'none';
-            document.getElementById('facultyDashboardWorkspace').style.display = 'none';
-            document.getElementById('studentPortalWorkspace').style.display = 'none';
-
-            if (targetView === 'faculty-auth') {
-                document.getElementById('facultyAuthScreen').style.display = 'block';
-            } else if (targetView === 'student-portal') {
-                document.getElementById('studentPortalWorkspace').style.display = 'block';
+            document.getElementById('portalGateway').style.display = "none";
+            document.getElementById('facultyAuthScreen').style.display = "none";
+            document.getElementById('facultyDashboardWorkspace').style.display = "none";
+            document.getElementById('studentPortalWorkspace').style.display = "none";
+            
+            if(targetView === 'faculty-auth') {
+                document.getElementById('facultyAuthScreen').style.display = "block";
+            } else if(targetView === 'student-portal') {
+                document.getElementById('studentPortalWorkspace').style.display = "block";
+                updateStudentSyllabusUI();
+                let activeNotice = localStorage.getItem('active_broadcast_notice');
+                if(activeNotice) { triggerNoticePopUp(activeNotice); }
             }
         }
+
+        function returnToGateway() {
+            document.getElementById('facultyAuthScreen').style.display = "none";
+            document.getElementById('facultyDashboardWorkspace').style.display = "none";
+            document.getElementById('studentPortalWorkspace').style.display = "none";
+            document.getElementById('portalGateway').style.display = "block";
+            document.getElementById('facultyPass').value = "";
+            closeNoticePopUp(); closeReminderPopUp(); closeFacultyReminderPopUp();
+        }
+
+        function verifyAndUnlockFacultyDashboard() {
+            let enteredPass = document.getElementById('facultyPass').value;
+            if(enteredPass === getFacultyPassword()) {
+                alert("🎉 Access Granted!");
+                document.getElementById('facultyAuthScreen').style.display = "none";
+                document.getElementById('facultyDashboardWorkspace').style.display = "block";
+                onBranchOrSemChange();
+                updateKarmaDisplay();
+                let branch = document.getElementById('branchSelect').value;
+                let sem = document.getElementById('semSelect').value;
+                if (session_metrics[branch][sem] === 0) {
+                    document.getElementById('facultyReminderPopUp').style.display = "block";
+                }
+            } else {
+                alert("🛑 Invalid Security Key!");
+            }
+        }
+
+        function lockAndLogoutFaculty() { returnToGateway(); }
+        function closeNoticePopUp() { document.getElementById('noticePopUp').style.display = "none"; }
+        function closeReminderPopUp() { document.getElementById('reminderPopUp').style.display = "none"; }
+        function closeFacultyReminderPopUp() { document.getElementById('facultyReminderPopUp').style.display = "none"; }
+        function triggerNoticePopUp(text) { document.getElementById('popupNoticeText').innerText = text; document.getElementById('noticePopUp').style.display = "block"; }
+
+        function updateKarmaDisplay() {
+            let avgRating = (faculty_karma_score.total_stars / faculty_karma_score.total_ratings_count).toFixed(1);
+            document.getElementById('facultyKarmaBox').innerHTML = `👑 Faculty Karma Score: ${avgRating}★ / 5★ (${faculty_karma_score.total_ratings_count} Student Appraisals)`;
+        }
+
+        function changeFacultyPassword() {
+            let newPass = document.getElementById('newFacultyPass').value;
+            if (!newPass || newPass.trim() === "") return alert("Error: Key cannot be empty.");
+            localStorage.setItem('faculty_key', newPass);
+            alert("Success: Key configured dynamically.");
+            document.getElementById('newFacultyPass').value = '';
+        }
+
+        function uploadSyllabusPDF() {
+            let fileInput = document.getElementById('syllabusFileInput');
+            let branch = document.getElementById('branchSelect').value;
+            let sem = document.getElementById('semSelect').value;
+            if (fileInput.files.length === 0) return alert("Please select a valid PDF file first.");
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                localStorage.setItem(`syllabus_pdf_${branch}_${sem}`, e.target.result);
+                document.getElementById('facultySyllabusStatus').innerText = `✅ Syllabus PDF Saved for [${branch} - ${sem}]`;
+                alert("Success: Syllabus document committed to storage.");
+            };
+            reader.readAsDataURL(fileInput.files[0]);
+        }
+
+        function updateStudentSyllabusUI() {
+            let branch = document.getElementById('branchSelect').value;
+            let sem = document.getElementById('semSelect').value;
+            let hasPDF = localStorage.getItem(`syllabus_pdf_${branch}_${sem}`);
+            let btn = document.getElementById('downloadSyllabusBtn');
+            if(hasPDF) {
+                btn.innerText = "📥 Download Syllabus PDF Document";
+                btn.disabled = false; btn.style.background = "#a855f7";
+            } else {
+                btn.innerText = "❌ No Syllabus Uploaded Yet for Selected Semester";
+                btn.disabled = true; btn.style.background = "#475569";
+            }
+        }
+
+        function downloadSyllabusPDF() {
+            let branch = document.getElementById('branchSelect').value;
+            let sem = document.getElementById('semSelect').value;
+            let pdfData = localStorage.getItem(`syllabus_pdf_${branch}_${sem}`);
+            if(!pdfData) return alert("No document file found.");
+            let link = document.createElement('a');
+            link.href = pdfData; link.download = `MAKAUT_Syllabus_${branch}_${sem}.pdf`; link.click();
+        }
+
+        function submitFacultyRating() {
+            let searchRoll = parseInt(document.getElementById('searchRoll').value);
+            let currentBranch = document.getElementById('branchSelect').value;
+            if(!searchRoll || !global_college_db.find(s => s.roll === searchRoll && s.branch === currentBranch)) {
+                return alert("Error: Please verify your identity roll parameter first.");
+            }
+            faculty_karma_score.total_stars += parseInt(document.getElementById('ratingScore').value);
+            faculty_karma_score.total_ratings_count += 1;
+            saveDatabase(); alert("❤️ Success: Appraisal transmitted safely!");
+        }
+
+        function broadcastNotice() {
+            let notice = document.getElementById('noticeInput').value;
+            if(!notice || notice.trim() === "") return alert("Error: Notice text cannot be blank.");
+            localStorage.setItem('active_broadcast_notice', notice);
+            triggerNoticePopUp(notice); document.getElementById('noticeInput').value = "";
+        }
+
+        function onBranchOrSemChange() {
+            let branch = document.getElementById('branchSelect').value;
+            let sem = document.getElementById('semSelect').value;
+            document.getElementById('totalClassesLabel').innerText = session_metrics[branch][sem];
+            let subjectDropdown = document.getElementById('branchSubjects');
+            subjectDropdown.innerHTML = "";
+            branch_syllabus[branch].forEach(sub => {
+                let opt = document.createElement('option'); opt.value = sub; opt.innerText = sub;
+                subjectDropdown.appendChild(opt);
+            });
+            renderAttendanceGrid(branch);
+        }
+
+        function incrementTotalClasses() {
+            let branch = document.getElementById('branchSelect').value;
+            let sem = document.getElementById('semSelect').value;
+            session_metrics[branch][sem] += 1;
+            document.getElementById('totalClassesLabel').innerText = session_metrics[branch][sem];
+            saveDatabase();
+        } 
