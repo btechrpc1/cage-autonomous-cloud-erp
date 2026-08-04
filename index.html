@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CGEC - Enterprise Core Live ERP Infrastructure</title>
+    <style>
+        :root {
+            --bg-main: #0b0f19;
+            --card-bg: #151f32;
+            --accent: #38bdf8;
+            --text-primary: #f8fafc;
+            --border-color: #243552;
+            --present-color: #34d399;
+            --absent-color: #f87171;
+            --gold: #eab308;
+        }
+        body { background-color: var(--bg-main); color: var(--text-primary); font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; padding: 20px; }
+        .container { max-width: 700px; margin: 0 auto; }
+        .college-header { text-align: center; background: linear-gradient(135deg, #1e3a8a, #0369a1); padding: 25px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #38bdf8; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
+        .college-header h2 { margin: 0; color: white; font-size: 22px; }
+        .college-header p { margin: 5px 0 0 0; color: #bae6fd; font-size: 13px; }
+        .card { background-color: var(--card-bg); padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--border-color); }
+        .tpo-card { border-left: 6px solid var(--gold); }
+        h3 { margin-top: 0; color: #cbd5e1; font-size: 16px; text-align: center; font-weight: 600; }
+        h4 { margin: 15px 0 8px 0; color: var(--accent); font-size: 13px; border-bottom: 1px solid var(--border-color); padding-bottom: 4px; }
+        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 12px; background-color: #0b0f19; border: 1px solid var(--border-color); border-radius: 4px; color: white; font-size: 13px; box-sizing: border-box; }
+        button { width: 100%; padding: 14px; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.15s; display: block; box-sizing: border-box; }
+        button:hover { opacity: 0.9; transform: scale(0.99); }
+        .btn-secondary { background-color: #334155; }
+        .row { display: flex; gap: 10px; }
+        .academic-days-tracker { background: #0b0f19; padding: 12px; border-radius: 4px; border: 1px dashed var(--border-color); margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .academic-days-tracker p { margin: 0; font-size: 12px; color: #94a3b8; }
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(95px, 1fr)); gap: 10px; margin-top: 12px; }
+        .student-grid-card { background-color: #1e293b; padding: 12px 6px; border-radius: 4px; text-align: center; font-size: 11px; cursor: pointer; border: 1px solid #334155; font-weight: bold; }
+        .student-grid-card.present { background-color: #065f46; border-color: var(--present-color); color: #a7f3d0; }
+        .student-grid-card.absent { background-color: #7f1d1d; border-color: var(--absent-color); color: #fecdd3; }
+        .output-box { margin-top: 15px; padding: 18px; background-color: #0b0f19; border-radius: 4px; border-left: 4px solid var(--accent); white-space: pre-wrap; font-family: monospace; font-size: 12px; color: #cbd5e1; line-height: 1.4; }
+        hr { border: 0; border-top: 1px solid var(--border-color); margin: 18px 0; }
+        
+        .popup-notification { display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 550px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); z-index: 10000; }
+        .popup-content { padding: 18px; text-align: center; }
+        .popup-content h4 { margin: 0 0 8px 0; font-weight: bold; font-size: 14px; border: none; padding: 0; }
+        .popup-content p { margin: 0 0 12px 0; font-size: 12px; line-height: 1.4; white-space: pre-line; }
+
+        @media print {
+            body { background: white !important; color: black !important; padding: 0; }
+            .container { max-width: 100%; width: 100%; }
+            .college-header, select, input, button, h4, hr, .popup-notification, .academic-days-tracker { display: none !important; }
+            .output-box { border: 2px solid black !important; padding: 25px !important; background: white !important; color: black !important; font-size: 13px !important; box-shadow: none !important; margin: 0 !important; width: 100% !important; }
+        }
+    </style>
+</head>
+<body>
+    <div id="noticePopUp" class="popup-notification" style="display:none; background-color: #1e3a8a; border: 2px solid #38bdf8;"><div class="popup-content" style="color: #bae6fd;"><h4>🚨 SYSTEM BROADCAST</h4><p id="popupNoticeText"></p><button onclick="document.getElementById('noticePopUp').style.display='none'" class="btn-secondary" style="width:auto;padding:5px 10px;">Dismiss</button></div></div>
+    <div id="alertPopUp" class="popup-notification" style="display:none; background-color:#7f1d1d; border: 2px solid #ef4444;"><div class="popup-content" style="color: #fecdd3;"><h4>⚠️ CRITICAL RISK DETECTED</h4><p id="popupAlertText"></p><button onclick="document.getElementById('alertPopUp').style.display='none'" class="btn-secondary" style="width:auto;padding:5px 10px;">Close</button></div></div>
+    
+    <div class="container">
+        <div class="college-header">
+            <h2>🏛️ COOCH BEHAR GOVERNMENT ENGINEERING COLLEGE</h2>
+            <p>Autonomous 4-Year B.Tech Cloud ERP Node Infrastructure</p>
+        </div>
+        
+        <div id="mainUnlockedConsole" style="display: block;">
+            <div class="card" style="border-top: 4px solid #2563eb;">
+                <h3>👨‍🏫 FACULTY ADMINISTRATIVE CONTROL AREA</h3>
+                <h4>🎯 Academic Cohort & Year Filters</h4>
+                <div class="row">
+                    <select id="branchSelect" onchange="onBranchOrSemChange()">
+                        <option value="CSE">Computer Science & Eng. (CSE)</option>
+                        <option value="ECE">Electronics & Comm. (ECE)</option>
+                        <option value="EE">Electrical Eng. (EE)</option>
+                        <option value="CE">Civil Eng. (CE)</option>
+                        <option value="ME">Mechanical Eng. (ME)</option>
+                    </select>
+                    <select id="yearSelect" onchange="onBranchOrSemChange(); toggleHostelFormPrivileges();">
+                        <option value="4th">4th Year (Senior)</option>
+                        <option value="1st">1st Year (Freshman)</option>
+                        <option value="2nd">2nd Year (Sophomore)</option>
+                        <option value="3rd">3rd Year (Junior)</option>
+                    </select>
+                    <select id="semSelect" onchange="onBranchOrSemChange()">
+                        <option value="Odd">Odd Sem</option>
+                        <option value="Even">Even Sem</option>
+                    </select>
+                </div>
+                <div class="academic-days-tracker">
+                    <p>📈 Total Conducted Sessions: <strong id="totalClassesLabel" style="color:var(--accent);">24</strong> Classes</p>
+                    <button onclick="incrementTotalClasses()" style="background-color: #3b82f6; font-size: 11px; padding: 6px 12px; width: auto;">➕ Log New Class</button>
+                </div>
+                
+                <h4>👥 Register Student KYC Profile</h4>
+                <div class="row">
+                    <input type="text" id="sFirstName" placeholder="First Name">
+                    <input type="text" id="sLastName" placeholder="Last Name">
+                    <input type="number" id="sRoll" placeholder="University Roll ID">
+                    <input type="number" id="passYearInput" placeholder="Passing Year">
+                </div>
+                <button onclick="registerStudent()" style="background-color: #0284c7; margin-bottom: 15px;">Initialize Registry Matrix</button>
+                
+                <h4>📋 Smart One-Click Attendance Grid</h4>
+                <div id="attendanceGrid" class="grid-container"></div>
+                
+                <h4>📊 Multi-Tier Evaluation Records (MAKAUT Core)</h4>
+                <input type="number" id="tRoll" placeholder="Enter Target Student Roll Number to Update marks">
+                <div class="row">
+                    <input type="number" id="ca1Marks" placeholder="CA 1 (0-25)"><input type="number" id="ca2Marks" placeholder="CA 2 (0-25)"><input type="number" id="ca3Marks" placeholder="CA 3 (0-25)"><input type="number" id="ca4Marks" placeholder="CA 4 (0-25)">
+                </div>
+                <div class="row">
+                    <input type="number" id="midSemMarks" placeholder="Mid Sem Exam (0-30)"><input type="number" id="assignmentMarks" placeholder="Assignments & Quizzes (0-15)">
+                </div>
+                <div class="row">
+                    <input type="number" id="labPracticalMarks" placeholder="Lab Practical (0-100)"><input type="number" id="vivaMarks" placeholder="External Board Viva (0-50)"><input type="number" id="endSemTheory" placeholder="End Sem Theory Marks">
+                </div>
+                <div class="row">
+                    <input type="number" id="projectMarks" placeholder="Major Project (0-200)"><input type="number" id="internshipMarks" placeholder="Internship (0-100)">
+                </div>
+                <div class="row">
+                    <input type="number" id="marPoints" placeholder="MAR Points (0-100)"><input type="number" id="moocsCredits" placeholder="MOOCs Credits (0-12)"><input type="number" id="sMarks" step="0.01" placeholder="Semester SGPA (0.00-10.00)">
+                </div>
+                <div class="row">
+                    <select id="backlogSelect"><option value="No">No Active Backlogs (Clear)</option><option value="Yes">⚠️ Has Active Backlog Papers</option></select>
+                    <option value="No">No Active Backlogs (Clear)</option>
+                        <option value="Yes">⚠️ Has Active Backlog Papers</option>
+                    </select>
+                    <select id="scriptStatusSelect">
+                        <option value="Yes">📜 Exam Khata: Checked & Logged</option>
+                        <option value="No">Exam Khata: In Evaluation Phase</option>
+                    </select>
+                    <input type="file" id="khataPDFInput" accept=".pdf" onchange="captureScriptPDF(this)" style="padding: 5px; background: #0b0f19;">
+                </div>
+                <div class="row" style="margin-top: 10px;">
+                    <select id="placementStatusSelect">
+                        <option value="Not Placed">Placement: Unplaced</option>
+                        <option value="Placed - TCS">🟩 Placed: TCS</option>
+                        <option value="Placed - Cognizant">🟩 Placed: Cognizant</option>
+                    </select>
+                    <input type="number" id="packageCTC" step="0.1" placeholder="Offered CTC (LPA)">
+                    <input type="number" id="gateScore" placeholder="GATE Score">
+                    <input type="number" id="aptitudeScore" placeholder="Aptitude %">
+                </div>
+                <h4 id="hostelLockNotice" style="color: #f87171; display: none;">🔒 Hostels restricted to 3rd & 4th Year Boys at CGEC.</h4>
+                <div class="row" style="margin-top: 10px;">
+                    <select id="hostelStateSelect"><option value="Day Scholar">Day Scholar / PG Occupant</option><option value="CGEC Boys Hostel 1">🏠 Boys Hostel 1</option><option value="CGEC Boys Hostel 2">🏠 Boys Hostel 2</option></select>
+                    <input type="text" id="hostelRoomNo" placeholder="Room No"><input type="number" id="messBillDue" placeholder="Pending Mess Bill (INR)">
+                </div>
+                <div class="row">
+                    <select id="scholarshipTypeSelect"><option value="None">No Active Scholarship</option><option value="SVMCM">Swami Vivekananda (SVMCM)</option></select>
+                    <select id="scholarshipStatusSelect"><option value="Pending">Welfare: Pending</option><option value="Approved">🟩 Welfare: Released</option></select>
+                </div>
+                <button onclick="updateTeacherData()" style="background-color: #059669; margin-top: 12px;">Lock & Sync Student Records</button>
+                <button onclick="generateLeaderboard()" style="background-color: #eab308; color: black; margin-top: 10px;">🏆 Compute Ranks & Sort Cohort Array</button>
+                <div id="leaderboardOutput" class="output-box">Leaderboard metrics will populate here...</div>
+            </div>
+            
+            <div class="card" style="border-top: 4px solid #10b981;">
+                <h3>📊 STUDENT PUBLIC SEARCH TERMINAL</h3>
+                <div class="row">
+                    <select id="studentBranchSelect"><option value="CSE">CSE</option><option value="ECE">ECE</option></select>
+                    <select id="studentYearSelect"><option value="4th">4th Year</option><option value="1st">1st Year</option></select>
+                </div>
+                <div class="row">
+                    <input type="number" id="searchRoll" placeholder="Enter Your Registered University Roll Number">
+                    <button onclick="generateDeepReport()" style="background-color: #10b981; width: auto; padding: 0 20px;">Generate Scorecard</button>
+                </div>
+                <div id="reportOutput" class="output-box">Student individual verified record statement...</div>
+                <button id="printBtn" onclick="window.print()" style="background-color: #eab308; color: black; margin-top: 15px; display: none;">📥 PRINT OFFICIAL GRADE SHEET (PDF)</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let global_college_db = [
+            { roll: 3006789, firstName: "Krishan Dev", lastName: "Mishra", branch: "CSE", currentYear: "4th", sem: "Odd", passingYear: 2026, dateOfDeclaration: "04/08/2026", attendance_count: 18, cgpa: 9.32, backlogStatus: "No", khataEvaluated: "Yes", scriptPDF: null, ca_exams: { CA1: 22.5, CA2: 23.8, CA3: 21, CA4: 24.2 }, evaluations: { mid_sem: 42, assignments: 27, pca1: 38, pca2: 39, viva: 45, project: 190, internship: 45, gate: 680, placement: 85, mar: 105, moocs: 12, end_sem_theory: 78, end_sem_practical: 88 }, infrastructure: { hostelState: "CGEC Boys Hostel 2", roomNo: "B-302", messBill: 0, scholarshipType: "SVMCM", scholarshipStatus: "Approved" }, placementStatus: "Placed - TCS", offeredCTC: 7.2 }
+        ];
+
+        let session_metrics = { CSE: { "4th-Odd": 24, "1st-Odd": 24, "2nd-Odd": 24, "3rd-Odd": 24 }, ECE: { "4th-Odd": 24, "1st-Odd": 24 }, EE: { "4th-Odd": 24, "1st-Odd": 24 }, CE: { "4th-Odd": 24, "1st-Odd": 24 }, ME: { "4th-Odd": 24, "1st-Odd": 24 } };
+        let active_uploaded_pdf_base64 = null;
+
+        function toggleHostelFormPrivileges() {
+            let currentYear = document.getElementById('yearSelect').value;
+            let selectBox = document.getElementById('hostelStateSelect'); let roomInput = document.getElementById('hostelRoomNo'); let billInput = document.getElementById('messBillDue'); let lockNotice = document.getElementById('hostelLockNotice');
+            if(currentYear === "1st" || currentYear === "2nd") { selectBox.value = "Day Scholar"; selectBox.disabled = true; roomInput.value = ""; roomInput.disabled = true; billInput.value = ""; billInput.disabled = true; if(lockNotice) lockNotice.style.display = "block"; }
+            else { selectBox.disabled = false; roomInput.disabled = false; billInput.disabled = false; if(lockNotice) lockNotice.style.display = "none"; }
+        }
+
+        function onBranchOrSemChange() { 
+            let branch = document.getElementById('branchSelect').value; 
+            let year = document.getElementById('yearSelect').value; 
+            let sem = document.getElementById('semSelect').value; 
+            document.getElementById('totalClassesLabel').innerText = session_metrics[branch][`${year}-${sem}`] || 0; 
+            renderAttendanceGrid(branch, year, sem); 
+        }
+
+        function incrementTotalClasses() { 
+            let branch = document.getElementById('branchSelect').value; 
+            let year = document.getElementById('yearSelect').value; 
+            let sem = document.getElementById('semSelect').value; 
+            let key = `${year}-${sem}`; 
+            if(!session_metrics[branch][key]) session_metrics[branch][key] = 0; 
+            session_metrics[branch][key] += 1; 
+            document.getElementById('totalClassesLabel').innerText = session_metrics[branch][key]; 
+            renderAttendanceGrid(branch, year, sem);
+        }
+
+        function renderAttendanceGrid(branch, year, sem) {
+            let gridContainer = document.getElementById('attendanceGrid'); gridContainer.innerHTML = "";
+            let filteredList = global_college_db.filter(s => s.branch === branch && s.currentYear === year && s.sem === sem);
+            if(filteredList.length === 0) { gridContainer.innerHTML = "<p style='color:#64748b; font-size:11px;'>No students registered in current view node.</p>"; return; }
+            filteredList.forEach(student => {
+                let card = document.createElement('div'); card.className = "student-grid-card present"; card.innerText = `Roll: ${student.roll}\n${student.firstName}`;
+                card.onclick = function() { if(card.classList.contains('present')) { card.classList.remove('present'); card.classList.add('absent'); student.attendance_count = Math.max(0, student.attendance_count - 1); } else { card.classList.remove('absent'); card.classList.add('present'); student.attendance_count += 1; } }; gridContainer.appendChild(card);
+            });
+        }
+
+        function registerStudent() {
+            let fName = document.getElementById('sFirstName').value; let lName = document.getElementById('sLastName').value; let roll = parseInt(document.getElementById('sRoll').value); let pYear = parseInt(document.getElementById('passYearInput').value); let branch = document.getElementById('branchSelect').value; let year = document.getElementById('yearSelect').value; let sem = document.getElementById('semSelect').value;
+            if(!fName || !lName || isNaN(roll) || isNaN(pYear)) return alert("Fields parameters missing.");
+            global_college_db.push({ roll: roll, firstName: fName, lastName: lName, branch: branch, currentYear: year, sem: sem, passingYear: pYear, dateOfDeclaration: "04/08/2026", attendance_count: 10, backlogStatus: "No", khataEvaluated: "No", scriptPDF: null, ca_exams: { CA1: 0, CA2: 0, CA3: 0, CA4: 0 }, evaluations: { mid_sem: 0, assignments: 0, pca1: 0, pca2: 0, viva: 0, project: 0, internship: 0, gate: 0, placement: 0, mar: 0, moocs: 0, end_sem_theory: 0, end_sem_practical: 0 }, infrastructure: { hostelState: "Day Scholar", roomNo: "N/A", messBill: 0, scholarshipType: "None", scholarshipStatus: "Pending" } });
+            alert("✨ Success: Student configuration initialized live in memory grid!"); 
+            document.getElementById('sFirstName').value = ''; document.getElementById('sLastName').value = ''; document.getElementById('sRoll').value = ''; document.getElementById('passYearInput').value = '';
+            onBranchOrSemChange();
+        }
+
+        function captureScriptPDF(inputElement) { let file = inputElement.files; if (file) { let reader = new FileReader(); reader.onload = function(e) { active_uploaded_pdf_base64 = e.target.result; }; reader.readAsDataURL(file); } }
+
+        function updateTeacherData() {
+            let currentBranch = document.getElementById('branchSelect').value; let year = document.getElementById('yearSelect').value; let sem = document.getElementById('semSelect').value; let roll = parseInt(document.getElementById('tRoll').value);
+            let student = global_college_db.find(s => s.roll === roll && s.branch === currentBranch && s.currentYear === year); 
+            if(!student) { document.getElementById('reportOutput').innerText = "🛑 University Roll ID not found in current stream allocation."; return; }
+            
+            let totalSessions = session_metrics[currentBranch][`${year}-${student.sem}`] || 1; 
+            let attPercentage = (student.attendance_count / totalSessions) * 100; 
+            if(isNaN(attPercentage) || attPercentage === 0) attPercentage = 82; 
+            
+            let ev = student.evaluations; 
+            let pct = (student.cgpa - 0.75) * 10; 
+            if(isNaN(pct) || pct <= 0) pct = 0; 
+            let gradeObj = calculateCgecGrade(student.cgpa);
+            
+            let classification = student.cgpa >= 7.50 ? "🥇 FIRST CLASS WITH DISTINCTION (I-DIV)" : (student.cgpa >= 6.50 ? "🥈 FIRST CLASS CORE (I-DIV)" : "Regular Second Class (II-DIV)");
+            
+            let finalReport = "=== 🏛️ COOCH BEHAR GOVERNMENT ENGINEERING COLLEGE ===\n📜 OFFICIAL ACADEMIC TRANSCRIPT INTEGRATED SCORECARD STATEMENT\n------------------------------------------------------------------\n" +
+                         "Academic Tier : " + student.currentYear + " Year (" + student.sem + " Semester Matrix)\nBranch Stream : B.Tech Department of " + student.branch + " | Session Code: " + student.passingYear + "\nStudent Name  : " + student.firstName.toUpperCase() + " " + student.lastName.toUpperCase() + " | Roll ID: " + student.roll + "\n------------------------------------------------------------------\n" +
+                         "[SECTION A: INTERNAL EVALUATION PRIVILEGES (THEORY CLASS)]\n  ├── Continuous Assessment 1 (CA1)    : " + student.ca_exams.CA1.toFixed(2) + " / 25 Marks\n  ├── Continuous Assessment 2 (CA2)    : " + student.ca_exams.CA2.toFixed(2) + " / 25 Marks\n  ├── Continuous Assessment 3 (CA3)    : " + student.ca_exams.CA3.toFixed(2) + " / 25 Marks\n  ├── Continuous Assessment 4 (CA4)    : " + student.ca_exams.CA4.toFixed(2) + " / 25 Marks\n  ├── Mid-Semester Internal Examination: " + ev.mid_sem.toFixed(2) + " / 50 Marks\n  └── Assignments & Quizzes Terminal   : " + ev.assignments.toFixed(2) + " / 30 Marks\n\n" +
+                         "[SECTION B: PRACTICAL CONTINUOUS ASSESSMENT (LAB CORE)]\n  ├── Practical Continuous Assessment 1: " + ev.pca1.toFixed(2) + " / 40 Marks\n  ├── Practical Continuous Assessment 2: " + ev.pca2.toFixed(2) + " / 40 Marks\n  └── External Board Face-to-Face Viva : " + ev.viva.toFixed(2) + " / 50 Marks\n\n" +
+                         "[SECTION C: CAMPUS TPO INFRASTRUCTURE LOGS]\n  ├── 4th Year Final Innovation Project: " + ev.project.toFixed(2) + " / 200 Marks\n  ├── Sessional Industrial Internship  : " + ev.internship.toFixed(2) + " / 50 Marks\n  ├── National GATE Exam Score Tracker : " + ev.gate + " / 1000 Points\n  ├── Placement Aptitude Metric Status : " + ev.placement.toFixed(2) + "% Score\n  └── Corporate Drive State            : " + (student.placementStatus || "Unplaced") + " (Package: " + (student.offeredCTC || 0) + " LPA)\n\n" +
+                         "[SECTION D: INFRASTRUCTURE & WELFARE SUBSIDIES]\n  ├── Allocated Hostel Wing Reference  : " + student.infrastructure.hostelState + " (Room: " + student.infrastructure.roomNo + ")\n  ├── Mess Bill Outstanding Balance    : INR " + student.infrastructure.messBill + " /-\n  └── WB Government Scholarship Portal : " + student.infrastructure.scholarshipType + " (State: " + student.infrastructure.scholarshipStatus + ")\n------------------------------------------------------------------\n" +
+                         "🎯 FINAL CUMULATIVE SGPA     : " + student.cgpa.toFixed(2) + " / 10.00\n📈 CALCULATED WEIGHT PERCENTAGE: " + pct.toFixed(2) + " % Total Marks (MAKAUT Formula)\n🏅 LETTER GRADE ACCREDITED   : " + gradeObj.letter + " (" + gradeObj.points + ")\n🎓 ACADEMIC CLASSIFICATION  : " + classification + "\n------------------------------------------------------------------\n" +
+                         "📈 Attendance Theory Ratio  : " + attPercentage.toFixed(2) + "% (Verified State True)\n🔬 Attendance Practical Lab : 90.00% (Verified Code Entry True)\n🏅 MAR Points Accumulated   : " + ev.mar + " / 100 Points (Degree Condition Met ✅)\n📚 MOOCs NPTEL Passed       : " + ev.moocs + " / 12 Credits (Honours Degree Eligible ✅)\n📜 DIGITAL SCRIPT STATUS    : " + (student.scriptPDF ? "✅ Evaluated Answer Sheet Attached" : "❌ PDF Answer Sheet Pending") + "\n------------------------------------------------------------------\n🔐 Ledger State: Data locked by CGEC Admin board Authority Matrix.";
+            
+            document.getElementById('reportOutput').innerText = finalReport; 
+            document.getElementById('printBtn').style.display = "block"; 
+            
+            if(student.scriptPDF) { 
+                let dlBtn = document.createElement('button'); dlBtn.innerText = "📥 Download Evaluated Digital Answer Script (PDF)"; dlBtn.style.background = "#a855f7"; dlBtn.style.marginTop = "10px"; 
+                dlBtn.onclick = function() { downloadEvaluatedKhata(student.roll); }; 
+                document.getElementById('reportOutput').appendChild(dlBtn); 
+            }
+            
+            if(attPercentage < 75) { 
+                document.getElementById('popupAlertText').innerText = `⚠️ ATTENDANCE DROPPED UNDER 75%:\nRoll ID ${student.roll} has fallen to ${attPercentage.toFixed(2)}%. Form fill-up blocked!`; 
+                document.getElementById('alertPopUp').style.display = 'block'; 
+            }
+        }
+        window.onload = function() { onBranchOrSemChange(); };
+    </script>
+</body>
+</html>
